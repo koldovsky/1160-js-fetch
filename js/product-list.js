@@ -1,35 +1,13 @@
-const products = [
-    {
-        "id": "1",
-        "title": "Baby Yoda",
-        "price": 10.99,
-        "image": "img/baby-yoda.svg",
-        "description": "An adorable figure of Baby Yoda, also known as The Child, from the popular series. This charming figure captures the beloved character's cuteness and is perfect for fans of all ages."
-    },
-    {
-        "id": "2",
-        "title": "Banana",
-        "price": 9.99,
-        "image": "img/banana.svg",
-        "description": "A vibrant, lifelike banana that adds a touch of whimsy to any space. Made with attention to detail, it's a delightful piece for kitchen decor or as a playful addition to a child's playset."
-    },
-    {
-        "id": "3",
-        "title": "Girl",
-        "price": 29.99,
-        "image": "img/girl.svg",
-        "description": "A beautifully crafted figure of a girl with intricate details. This figure embodies the spirit of youth and innocence, making it a wonderful gift or a decorative piece for your home."
-    },
-    {
-        "id": "4",
-        "title": "Viking",
-        "price": 22.99,
-        "image": "img/viking.svg",
-        "description": "A fierce and majestic Viking figure, showcasing the legendary warriors of the north. With detailed armor and weaponry, this figure is a must-have for history buffs and enthusiasts of Norse culture."
-    }
-];
+const response = await fetch('api/products.json');
+const products = await response.json();
+renderProducts(products);
 
-function renderProducts(products) {
+// fetch('api/products.json')
+//     .then( response => response.json() )
+//     .then( products => renderProducts(products) )
+//     .catch( error => console.log(error) );
+
+function renderProducts(products, rate = 1) {
   let productsDomString = '';
   for (const product of products) {
     productsDomString += `
@@ -43,7 +21,7 @@ function renderProducts(products) {
                     Info
                 </button>
                 <button class="product-card__buttons-buy button button-card">
-                    Buy - ${product.price}
+                    Buy - ${(product.price * rate).toFixed(2)}
                 </button>
             </div>
         </article>`;
@@ -51,4 +29,22 @@ function renderProducts(products) {
   const productsContainer = document.querySelector('.products__list');
   productsContainer.innerHTML = productsDomString;
 }
-renderProducts(products);
+
+let currencies;
+let lastRead = 0;
+async function convertCurrency() {
+    if (!currencies || (new Date() - lastRead > 30 * 1000) ) {
+        try {
+            const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+            currencies = await response.json();
+        } catch (error) {
+            console.error('Error: ' + error.message);
+        }
+        lastRead = new Date();
+    }
+    const convertTo = document.querySelector('.products__currency').value;
+    const rate = currencies.rates[convertTo];
+    renderProducts(products, rate);
+}
+
+document.querySelector('.products__currency').addEventListener('change', convertCurrency);
