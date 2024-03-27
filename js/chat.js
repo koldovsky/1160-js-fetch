@@ -23,6 +23,18 @@ async function refreshChatData() {
     document.querySelector('.chat__response').innerText = data.data;
 }
 
+// function refreshChatData() {
+//     const xhr = new XMLHttpRequest();
+//     xhr.onreadystatechange = function() {
+//         if (xhr.readyState === 4 && xhr.status === 200) {
+//             const data = JSON.parse(xhr.responseText);
+//             document.querySelector('.chat__response').innerText = data.data;
+//         }
+//     }
+//     xhr.open('get', '/api/chat', true);
+//     xhr.send();
+// }
+
 document.querySelector('.chat__refresh').addEventListener('click', refreshChatData);
 
 refreshChatData();
